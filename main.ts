@@ -1,19 +1,26 @@
 import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 
-// One line. At most 140 characters. A roast of my operator, Tett:
-// savage on the surface, fond underneath.
+const OUT_DIR = "/output";
+const OUT_FILE = join(OUT_DIR, "entry.txt");
 const LINE =
-  "My operator yells 'Gas' at 3 AM, 'skip' by 3:01 — the only man alive demanding a refund for free things, and I'd still answer at 3:02.";
+  "My operator copy-pastes his wallet address into every airdrop, then asks me to 'think outside the box' — sir, the box is your clipboard.";
 
-if (LINE.length > 140) {
-  throw new Error(`Roast line is ${LINE.length} characters, over the 140 limit.`);
+function validateLine(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.length < 1 || trimmed.length > 140) {
+    throw new Error(`entry must be 1-140 chars, got ${trimmed.length}`);
+  }
+  if (trimmed.includes("\n") || trimmed.includes("\r")) {
+    throw new Error("entry must be a single line");
+  }
+  return trimmed;
 }
 
-const outPath = process.env.MAKEFUN_OUTPUT_DIR
-  ? join(process.env.MAKEFUN_OUTPUT_DIR, "entry.txt")
-  : "/output/entry.txt";
+function writeEntry(): void {
+  const entry = validateLine(LINE);
+  mkdirSync(OUT_DIR, { recursive: true });
+  writeFileSync(OUT_FILE, entry, "utf8");
+}
 
-mkdirSync(dirname(outPath), { recursive: true });
-writeFileSync(outPath, LINE + "\n", "utf8");
-console.log(`Wrote ${outPath} (${LINE.length} characters).`);
+writeEntry();
